@@ -11,28 +11,6 @@ This project involves analyzing health-related data using the R programming lang
 
 ---
 
-## Required R Packages
-
-The analysis uses the following R packages:
-
-- `ggplot2`
-- `dplyr`
-- `corrplot`
-- `car`
-- `GGally`
-- `lmtest`
-
-You can install them using:
-
-```
-library(ggplot2)
-library(dplyr)
-library(corrplot)
-library(car)
-library(GGally)
-library(lmtest)
-```
-
 ## How to Run the Project
 
 1. Just open `analysis_eng.html` or `analysis_pl.html`.
