@@ -1,0 +1,103 @@
+
+---
+title: "Analiza danych zdrowotnych"
+author: "Mateusz Chorab"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(corrplot)
+library(car)
+library(GGally)
+library(lmtest)
+```
+
+## Import i eksploracja danych
+
+```{r}
+data <- read.csv("health.csv")
+summary(data)
+str(data)
+```
+
+## Histogramy i wnioski
+
+```{r}
+par(mfrow = c(3, 3))
+hist(data$systolic, main="Ciśnienie skurczowe", xlab="systolic")
+hist(data$weight, main="Waga", xlab="weight")
+hist(data$height, main="Wzrost", xlab="height")
+hist(data$bmi, main="BMI", xlab="bmi")
+hist(data$waist, main="Obwód talii", xlab="waist")
+hist(data$age, main="Wiek", xlab="age")
+hist(data$diabetes, main="Cukrzyca", xlab="diabetes")
+hist(data$smoker, main="Palenie", xlab="smoker")
+hist(data$fastfood, main="Fast food", xlab="fastfood")
+par(mfrow = c(1, 1))
+```
+
+## Korelacje
+
+```{r}
+cor_matrix <- cor(data)
+corrplot(cor_matrix, method="number")
+```
+
+## Model 1: Regresja liniowa prosta (systolic ~ age)
+
+```{r}
+model1 <- lm(systolic ~ age, data=data)
+summary(model1)
+```
+
+## Model 2: Regresja liniowa wieloraka (systolic ~ age + bmi + waist)
+
+```{r}
+model2 <- lm(systolic ~ age + bmi + waist, data=data)
+summary(model2)
+```
+
+## Model 3: Regresja wielomianowa (systolic ~ poly(age,2) + poly(bmi,2))
+
+```{r}
+model3 <- lm(systolic ~ poly(age,2) + poly(bmi,2), data=data)
+summary(model3)
+```
+
+## Model 4: Regresja ze zmienną binarną (systolic ~ age + bmi + smoker)
+
+```{r}
+model4 <- lm(systolic ~ age + bmi + smoker, data=data)
+summary(model4)
+```
+
+## Porównanie modeli - skorygowany R^2
+
+```{r}
+data.frame(
+  Model = c("Model 1", "Model 2", "Model 3", "Model 4"),
+  Adjusted_R2 = c(summary(model1)$adj.r.squared,
+                  summary(model2)$adj.r.squared,
+                  summary(model3)$adj.r.squared,
+                  summary(model4)$adj.r.squared)
+)
+```
+
+## Analiza reszt - Model 2
+
+```{r}
+res <- residuals(model2)
+par(mfrow = c(2, 2))
+plot(model2)
+par(mfrow = c(1, 1))
+
+shapiro.test(res)
+t.test(res)
+bptest(model2)
+durbinWatsonTest(model2)
+qqnorm(res); qqline(res)
+```
